@@ -15,6 +15,7 @@ namespace CanWeFixItApi
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseSetting("http_port", "5010");
                     webBuilder.UseUrls("http://localhost:5010");
                 });
     }

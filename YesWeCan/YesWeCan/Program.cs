@@ -54,7 +54,7 @@ namespace YesWeCan
             }
             
             "Press any key to exit...".WriteLine();
-            Console.Read();
+            Console.ReadKey();
         }
     }
 

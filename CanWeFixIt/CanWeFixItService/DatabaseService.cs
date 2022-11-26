@@ -13,7 +13,7 @@ namespace CanWeFixItService
         // Using a name and a shared cache allows multiple connections to access the same
         // in-memory database
         const string connectionString = "Data Source=DatabaseService;Mode=Memory;Cache=Shared";
-        private SqliteConnection _connection;
+        private readonly SqliteConnection _connection;
 
         public DatabaseService()
         {
@@ -23,21 +23,29 @@ namespace CanWeFixItService
             _connection.Open();
         }
         
-        public IEnumerable<Instrument> Instruments()
+        public async Task<IEnumerable<Instrument>> Instruments()
         {
-            return _connection.QueryAsync<Instrument>("SQL GOES HERE");
+	        var sql = "Select Id, Sedol, Name, Active from Instrument Where Active = 1";
+            return await _connection.QueryAsync<Instrument>(sql);
         }
 
-        public async Task<IEnumerable<MarketData>> MarketData()
+        public async Task<IEnumerable<MarketDataDto>> MarketData()
         {
-            return await _connection.QueryAsync<MarketData>("SELECT Id, DataValue FROM MarketData WHERE Active = 0");
+            var sql = "Select md.Id, md.DataValue, ism.Id as InstrumentId, md.Active from MarketData md Inner Join Instrument ism on md.Sedol = ism.Sedol Where md.Active = 1";
+            return await _connection.QueryAsync<MarketDataDto>(sql);
         }
 
-        /// <summary>
-        /// This is complete and will correctly load the test data.
-        /// It is called during app startup 
-        /// </summary>
-        public void SetupDatabase()
+        public async Task<IEnumerable<MarketValuation>> MarketValuation()
+        {
+	        var sql = "Select 'DataValueTotal' as Name, Sum(DataValue) as Total from MarketData Where Active = 1";
+	        return await _connection.QueryAsync<MarketValuation>(sql);
+        }
+
+		/// <summary>
+		/// This is complete and will correctly load the test data.
+		/// It is called during app startup 
+		/// </summary>
+		public void SetupDatabase()
         {
             const string createInstruments = @"
                 CREATE TABLE instrument
